@@ -23,10 +23,11 @@ def create_sidebar():
                             html.Div("AirLens", className="logo-text")
                         ]
                     ),
-                    html.Div("UK Air Quality · DEFRA", className="logo-subtitle")
+                    html.Div("UK Air Quality · DEFRA",
+                             className="logo-subtitle")
                 ]
             ),
-            
+
             # WHO / UK Toggle
             html.Div(
                 className="filter-section",
@@ -53,7 +54,7 @@ def create_sidebar():
                     dcc.Store(id="threshold-store", data="UK")
                 ]
             ),
-            
+
             # Theme Toggle
             html.Div(
                 className="filter-section",
@@ -79,7 +80,7 @@ def create_sidebar():
                     dcc.Store(id="theme-store", data="dark")
                 ]
             ),
-            
+
             # Reset Button
             html.Button(
                 "↻ Reset All Filters",
@@ -87,7 +88,7 @@ def create_sidebar():
                 className="reset-btn",
                 n_clicks=0
             ),
-            
+
             # Site Selection
             html.Div(
                 className="filter-section",
@@ -101,7 +102,7 @@ def create_sidebar():
                     )
                 ]
             ),
-            
+
             # Pollutant Selection
             html.Div(
                 className="filter-section",
@@ -114,7 +115,8 @@ def create_sidebar():
                     )
                 ]
             ),
-            
+            dcc.Store(id="filter_store"),
+
             # Date Range
             html.Div(
                 className="filter-section",
@@ -128,7 +130,7 @@ def create_sidebar():
                     )
                 ]
             ),
-            
+
 
         ]
     )

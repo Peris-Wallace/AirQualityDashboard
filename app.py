@@ -11,7 +11,7 @@ from components.sidebar import create_sidebar
 from components.kpi_tiles import create_kpi_tiles
 from components.station_cards import create_station_cards_section, create_circular_gauge
 from utils.calculations import (
-    calculate_exceedance,
+    calculate_exceedance_rosie,
     calculate_completeness,
     calculate_completeness_by_site,
     calculate_summary_stats,
@@ -48,7 +48,7 @@ app.layout = html.Div(
     children=[
         # Sidebar
         create_sidebar(),
-        
+
         # Main Content
         html.Div(
             id="main-content",
@@ -69,28 +69,31 @@ app.layout = html.Div(
                             children=[
                                 html.Div(
                                     className="meta-pill",
-                                    children=["Stations:", html.Strong("--", id="meta-stations")]
+                                    children=["Stations:", html.Strong(
+                                        "--", id="meta-stations")]
                                 ),
                                 html.Div(
                                     className="meta-pill",
-                                    children=["Pollutant:", html.Strong("--", id="meta-pollutant")]
+                                    children=["Pollutant:", html.Strong(
+                                        "--", id="meta-pollutant")]
                                 ),
                                 html.Div(
                                     className="meta-pill",
-                                    children=["Period:", html.Strong("--", id="meta-period")]
+                                    children=["Period:", html.Strong(
+                                        "--", id="meta-period")]
                                 )
                             ]
                         )
                     ]
                 ),
-                
+
                 # Content Area
                 html.Div(
                     className="content",
                     children=[
                         # KPI Tiles
                         create_kpi_tiles(),
-                        
+
                         # Time Series Chart
                         html.Div(
                             className="card",
@@ -98,25 +101,39 @@ app.layout = html.Div(
                                 html.Div(
                                     className="card-header",
                                     children=[
-                                        html.Div("Pollutant Concentration Over Time", className="card-title")
+                                        html.Div(
+                                            "Pollutant Concentration Over Time", className="card-title")
                                     ]
                                 ),
+                                html.Div(
+                                    id="filter_warning",
+                                    style={
+                                        "color": "#856404",
+                                        "backgroundColor": "#fff3cd",
+                                        "border": "1px solid #ffc107",
+                                        "borderRadius": "4px",
+                                        "padding": "10px 16px",
+                                        "margin": "8px 0",
+                                        "display": "none",  # hidden by default
+                                    }),
                                 html.Div(
                                     className="card-body",
                                     children=[
                                         dcc.Graph(
                                             id="time-series-chart",
                                             figure={},
-                                            config={'displayModeBar': True, 'displaylogo': False}
+                                            config={
+                                                'displayModeBar': True, 'displaylogo': False}
                                         )
                                     ]
                                 )
                             ]
                         ),
-                        
+
                         # Bottom Row: Stats + Completeness
                         html.Div(
-                            style={"display": "grid", "gridTemplateColumns": "1.5fr 1fr", "gap": "24px"},
+                            style={
+                                "display": "grid", "gridTemplateColumns": "1.5fr 1fr", "gap": "24px"},
                             children=[
                                 # Summary Statistics
                                 html.Div(
@@ -125,7 +142,8 @@ app.layout = html.Div(
                                         html.Div(
                                             className="card-header",
                                             children=[
-                                                html.Div("Summary Statistics", className="card-title")
+                                                html.Div(
+                                                    "Summary Statistics", className="card-title")
                                             ]
                                         ),
                                         html.Div(
@@ -138,54 +156,72 @@ app.layout = html.Div(
                                                         html.Div(
                                                             className="stat-cell",
                                                             children=[
-                                                                html.Div("Mean", className="stat-label"),
-                                                                html.Div("--", className="stat-value", id="stat-mean"),
-                                                                html.Div("μg/m³", className="stat-unit")
+                                                                html.Div(
+                                                                    "Mean", className="stat-label"),
+                                                                html.Div(
+                                                                    "--", className="stat-value", id="stat-mean"),
+                                                                html.Div(
+                                                                    "μg/m³", className="stat-unit")
                                                             ]
                                                         ),
                                                         # Median
                                                         html.Div(
                                                             className="stat-cell",
                                                             children=[
-                                                                html.Div("Median", className="stat-label"),
-                                                                html.Div("--", className="stat-value", id="stat-median"),
-                                                                html.Div("μg/m³", className="stat-unit")
+                                                                html.Div(
+                                                                    "Median", className="stat-label"),
+                                                                html.Div(
+                                                                    "--", className="stat-value", id="stat-median"),
+                                                                html.Div(
+                                                                    "μg/m³", className="stat-unit")
                                                             ]
                                                         ),
                                                         # Std Dev
                                                         html.Div(
                                                             className="stat-cell",
                                                             children=[
-                                                                html.Div("Std Dev", className="stat-label"),
-                                                                html.Div("--", className="stat-value", id="stat-std"),
-                                                                html.Div("μg/m³", className="stat-unit")
+                                                                html.Div(
+                                                                    "Std Dev", className="stat-label"),
+                                                                html.Div(
+                                                                    "--", className="stat-value", id="stat-std"),
+                                                                html.Div(
+                                                                    "μg/m³", className="stat-unit")
                                                             ]
                                                         ),
                                                         # Min
                                                         html.Div(
                                                             className="stat-cell",
                                                             children=[
-                                                                html.Div("Min", className="stat-label"),
-                                                                html.Div("--", className="stat-value", id="stat-min"),
-                                                                html.Div("μg/m³", className="stat-unit")
+                                                                html.Div(
+                                                                    "Min", className="stat-label"),
+                                                                html.Div(
+                                                                    "--", className="stat-value", id="stat-min"),
+                                                                html.Div(
+                                                                    "μg/m³", className="stat-unit")
                                                             ]
                                                         ),
                                                         # Max
                                                         html.Div(
                                                             className="stat-cell",
                                                             children=[
-                                                                html.Div("Max", className="stat-label"),
-                                                                html.Div("--", className="stat-value", id="stat-max"),
-                                                                html.Div("μg/m³", className="stat-unit")
+                                                                html.Div(
+                                                                    "Max", className="stat-label"),
+                                                                html.Div(
+                                                                    "--", className="stat-value", id="stat-max"),
+                                                                html.Div(
+                                                                    "μg/m³", className="stat-unit")
                                                             ]
                                                         ),
                                                         # IQR
                                                         html.Div(
                                                             className="stat-cell",
                                                             children=[
-                                                                html.Div("IQR", className="stat-label"),
-                                                                html.Div("--", className="stat-value", id="stat-iqr"),
-                                                                html.Div("μg/m³", className="stat-unit")
+                                                                html.Div(
+                                                                    "IQR", className="stat-label"),
+                                                                html.Div(
+                                                                    "--", className="stat-value", id="stat-iqr"),
+                                                                html.Div(
+                                                                    "μg/m³", className="stat-unit")
                                                             ]
                                                         )
                                                     ]
@@ -194,7 +230,7 @@ app.layout = html.Div(
                                         )
                                     ]
                                 ),
-                                
+
                                 # Data Completeness
                                 html.Div(
                                     className="card",
@@ -202,7 +238,8 @@ app.layout = html.Div(
                                         html.Div(
                                             className="card-header",
                                             children=[
-                                                html.Div("Data Completeness", className="card-title")
+                                                html.Div(
+                                                    "Data Completeness", className="card-title")
                                             ]
                                         ),
                                         html.Div(
@@ -210,7 +247,8 @@ app.layout = html.Div(
                                             children=[
                                                 # Overall percentage
                                                 html.Div(
-                                                    style={"textAlign": "center", "marginBottom": "24px"},
+                                                    style={
+                                                        "textAlign": "center", "marginBottom": "24px"},
                                                     children=[
                                                         html.Div(
                                                             "--",
@@ -249,7 +287,7 @@ app.layout = html.Div(
                                 )
                             ]
                         ),
-                        
+
                         # Station Cards
                         html.Div(
                             className="card",
@@ -258,7 +296,8 @@ app.layout = html.Div(
                                 html.Div(
                                     className="card-header",
                                     children=[
-                                        html.Div("Station Details", className="card-title")
+                                        html.Div("Station Details",
+                                                 className="card-title")
                                     ]
                                 ),
                                 html.Div(
@@ -289,17 +328,18 @@ def toggle_threshold(uk_clicks, who_clicks, current):
     """Handle WHO/UK threshold toggle."""
     if not uk_clicks and not who_clicks:
         return "toggle-option active", "toggle-option", "UK"
-    
+
     ctx = callback_context
     if not ctx.triggered:
         return "toggle-option active", "toggle-option", "UK"
-    
+
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    
+
     if button_id == "toggle-uk":
         return "toggle-option active", "toggle-option", "UK"
     else:
         return "toggle-option", "toggle-option active", "WHO"
+
 
 @callback(
     Output("toggle-dark", "className"),
@@ -314,86 +354,400 @@ def toggle_theme(dark_clicks, light_clicks, current):
     """Handle dark/light theme toggle."""
     if not dark_clicks and not light_clicks:
         return "toggle-option active", "toggle-option", "dark", "dark"
-    
+
     ctx = callback_context
     if not ctx.triggered:
         return "toggle-option active", "toggle-option", "dark", "dark"
-    
+
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    
+
     if button_id == "toggle-dark":
         return "toggle-option active", "toggle-option", "dark", "dark"
     else:
         return "toggle-option", "toggle-option active", "light", "light"
 
 
-@callback(
-    Output("site_drop", "value"),
-    Output("pol_drop", "value"),
-    Output("date_range", "start_date"),
-    Output("date_range", "end_date"),
-    Input("reset_btn", "n_clicks"),
-    prevent_initial_call=True
-)
-def reset_filters(n):
-    """Reset all filters."""
-    return [], None, None, None
+def register_callbacks(app, wales_df, wales_df_long):
+    # Precomputed maps to reduce repetition and increase dashboard's speed
 
+    site_to_pollutants = (
+        wales_df_long.groupby("site")["pollutants"]
+        .apply(set)
+        .to_dict()
+    )
 
-@callback(
-    Output("site_drop", "options"),
-    Input("pol_drop", "value"),
-    Input("date_range", "start_date"),
-    Input("date_range", "end_date")
-)
-def update_site_dropdown(pollutant, start_date, end_date):
-    """Update available sites."""
-    df_filtered = wales_df_long.copy()
-    if pollutant:
-        df_filtered = df_filtered[df_filtered["pollutants"] == pollutant]
-    if start_date and end_date:
-        df_filtered = df_filtered[
-            (df_filtered["date"] >= start_date) & (df_filtered["date"] <= end_date)
+    site_to_dates = (
+        wales_df_long.groupby("site")["date"]
+        .agg(["min", "max"])
+        .apply(lambda r: (r["min"].date(), r["max"].date()), axis=1)
+        .to_dict()
+    )
+
+    pol_to_dates = (
+        wales_df_long.groupby("pollutants")["date"]
+        .agg(["min", "max"])
+        .apply(lambda r: (r["min"].date(), r["max"].date()), axis=1)
+        .to_dict()
+    )
+
+    site_pol_to_dates = (
+        wales_df_long.groupby(["site", "pollutants"])["date"]
+        .agg(["min", "max"])
+        .apply(lambda r: (r["min"].date(), r["max"].date()), axis=1)
+        .to_dict()
+    )
+
+    pol_to_sites = (
+        wales_df_long.groupby("pollutants")["site"]
+        .apply(set)
+        .to_dict()
+    )
+
+    all_sites = sorted(wales_df_long["site"].unique())
+    all_pollutants = sorted(wales_df_long["pollutants"].unique())
+    global_min = wales_df_long["date"].min().date()
+    global_max = wales_df_long["date"].max().date()
+
+    def has_full_date_range(start_date, end_date):
+        return bool(start_date) and bool(end_date)
+
+    # Function to compute intersection window (date-only) for current selection
+    def compute_allowed_bounds(sites, pollutant):
+        sites = sites or []
+
+        if not sites:
+            if pollutant:
+                return pol_to_dates.get(pollutant, (global_min, global_max))
+            return global_min, global_max
+
+        ranges = []
+        for s in sites:
+            if pollutant:
+                key = (s, pollutant)
+                if key in site_pol_to_dates:
+                    ranges.append(site_pol_to_dates[key])
+            else:
+                if s in site_to_dates:
+                    ranges.append(site_to_dates[s])
+
+        if not ranges:
+            return None, None
+
+        min_allowed = max(r[0] for r in ranges)
+        max_allowed = min(r[1] for r in ranges)
+
+        if min_allowed > max_allowed:
+            return None, None
+
+        return min_allowed, max_allowed
+
+    # 1) Update site dropdown OPTIONS based on pollutant + date range
+
+    @app.callback(
+        Output("site_drop", "options"),
+        Input("pol_drop", "value"),
+        Input("date_range", "start_date"),
+        Input("date_range", "end_date"),
+        State("site_drop", "value"),
+    )
+    def update_site_dropdown(pollutant, start_date, end_date, currently_selected):
+        date_active = has_full_date_range(start_date, end_date)
+
+        if not pollutant and not date_active:
+            valid = all_sites
+
+        elif pollutant and not date_active:
+            valid = sorted(pol_to_sites.get(pollutant, set()))
+
+        else:
+            # Date range active (with or without pollutant)
+            start_dt = pd.to_datetime(start_date).date()
+            end_dt = pd.to_datetime(end_date).date()
+
+            candidates = pol_to_sites.get(pollutant, set(
+                all_sites)) if pollutant else set(all_sites)
+
+            valid = sorted([
+                site for site in candidates
+                if site in site_to_dates
+                and site_to_dates[site][0] <= end_dt
+                and site_to_dates[site][1] >= start_dt
+            ])
+
+        if currently_selected:
+            valid = sorted(set(valid) | set(currently_selected))
+
+        return valid
+
+    # 2) Update pollutant dropdown OPTIONS based on sites + date range
+
+    @app.callback(
+        Output("pol_drop", "options"),
+        Input("site_drop", "value"),
+        Input("date_range", "start_date"),
+        Input("date_range", "end_date"),
+        State("pol_drop", "value"),
+    )
+    def update_pollutant_dropdown(sites, start_date, end_date, currently_selected):
+        sites = sites or []
+        date_active = has_full_date_range(start_date, end_date)
+
+        if not sites and not date_active:
+            valid = all_pollutants
+
+        else:
+            start_dt = pd.to_datetime(
+                start_date).date() if date_active else None
+            end_dt = pd.to_datetime(end_date).date() if date_active else None
+
+            if not sites:
+                valid = all_pollutants
+                if date_active:
+                    valid = sorted(
+                        p for p, (p_min, p_max) in pol_to_dates.items()
+                        if p_min <= end_dt and p_max >= start_dt
+                    )
+            else:
+                common = set.intersection(*[
+                    site_to_pollutants[s] for s in sites if s in site_to_pollutants
+                ]) if sites else set(all_pollutants)
+
+                if date_active:
+                    common = {
+                        p for p in common
+                        if any(
+                            (s, p) in site_pol_to_dates
+                            and site_pol_to_dates[(s, p)][0] <= end_dt
+                            and site_pol_to_dates[(s, p)][1] >= start_dt
+                            for s in sites
+                        )
+                    }
+
+                valid = sorted(common)
+
+        if currently_selected and currently_selected not in valid:
+            valid = sorted(set(valid) | {currently_selected})
+
+        return valid
+
+    # 3) Reset dropdown VALUES
+
+    @app.callback(
+        Output("site_drop", "value"),
+        Output("pol_drop", "value"),
+        Input("reset_btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def reset_dropdowns(n_clicks):
+        return [], None
+
+        # 4) Sync filter_store with current UI values
+
+    @app.callback(
+        Output("filter_store", "data"),
+        Input("site_drop", "value"),
+        Input("pol_drop", "value"),
+        Input("date_range", "start_date"),
+        Input("date_range", "end_date"),
+    )
+    def sync_filter_store(sites, pollutant, start_date, end_date):
+        return {
+            "sites": sites or [],
+            "pollutant": pollutant,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+    # 5) Update ONLY date_range bounds from store
+
+    @app.callback(
+        Output("date_range", "min_date_allowed"),
+        Output("date_range", "max_date_allowed"),
+        Input("filter_store", "data"),
+    )
+    def update_date_bounds(store):
+        if not store:
+            return global_min, global_max
+
+        sites = store.get("sites", []) or []
+        pollutant = store.get("pollutant")
+
+        min_allowed, max_allowed = compute_allowed_bounds(sites, pollutant)
+
+        if min_allowed is None or max_allowed is None:
+            # Keep DatePicker usable even if no overlap — user can change selection
+            return global_min, global_max
+
+        return min_allowed, max_allowed
+
+    # 6) Manage date selection
+    #    - Reset clears selected dates
+    #    - Changing sites/pollutant clears selected dates if they become invalid
+
+    @app.callback(
+        Output("date_range", "start_date"),
+        Output("date_range", "end_date"),
+        Input("reset_btn", "n_clicks"),
+        Input("site_drop", "value"),
+        Input("pol_drop", "value"),
+        State("date_range", "start_date"),
+        State("date_range", "end_date"),
+    )
+    def manage_date_selection(n_clicks, sites, pollutant, start_date, end_date):
+        triggered = callback_context.triggered_id
+        sites = sites or []
+
+        # Reset always clears date selection
+        if triggered == "reset_btn":
+            return None, None
+
+        min_allowed, max_allowed = compute_allowed_bounds(sites, pollutant)
+
+        # If no overlap or no valid ranges, clear date selection
+        if min_allowed is None or max_allowed is None:
+            return None, None
+
+        # If user hasn't chosen both dates yet
+        if not has_full_date_range(start_date, end_date):
+            return no_update, no_update
+
+        # If current selection is outside allowed bounds, clear it
+        try:
+            cs = pd.to_datetime(start_date).date()
+            ce = pd.to_datetime(end_date).date()
+        except Exception:
+            return None, None
+
+        if cs < min_allowed or cs > max_allowed or ce < min_allowed or ce > max_allowed:
+            return None, None
+
+        return no_update, no_update
+        # 7) Warning banner
+
+    @app.callback(
+        Output("filter_warning", "children"),
+        Output("filter_warning", "style"),
+        Input("site_drop", "value"),
+        Input("pol_drop", "value"),
+        Input("date_range", "start_date"),
+        Input("date_range", "end_date"),
+    )
+    def show_filter_warning(sites, pollutant, start_date, end_date):
+        hidden = {"display": "none"}
+        visible = {
+            "color": "#856404",
+            "backgroundColor": "#fff3cd",
+            "border": "1px solid #ffc107",
+            "borderRadius": "4px",
+            "padding": "10px 16px",
+            "margin": "8px 0",
+            "display": "block",
+        }
+
+        sites = sites or []
+        date_active = has_full_date_range(start_date, end_date)
+
+        if not sites or not pollutant:
+            return "", hidden
+
+        # Sites that don't measure the pollutant
+        sites_missing_pollutant = [
+            s for s in sites
+            if pollutant not in site_to_pollutants.get(s, set())
         ]
-    return sorted(df_filtered["site"].unique())
+        if sites_missing_pollutant:
+            return (
+                f"⚠️ The following sites do not measure {pollutant} and will not "
+                f"appear on the graph: {', '.join(sites_missing_pollutant)}",
+                visible,
+            )
 
+        # If the date intersection for the selected sites is empty, tell user that there is no overlapping time period
+        min_allowed, max_allowed = compute_allowed_bounds(sites, pollutant)
+        if min_allowed is None or max_allowed is None:
+            return (
+                "⚠️ No overlapping time period exists across the selected sites "
+                "(and pollutant). Try fewer sites or remove the pollutant filter.",
+                visible,
+            )
 
-@callback(
-    Output("pol_drop", "options"),
-    Input("site_drop", "value"),
-    Input("date_range", "start_date"),
-    Input("date_range", "end_date")
-)
-def update_pollutant_dropdown(sites, start_date, end_date):
-    """Update available pollutants."""
-    df_filtered = wales_df_long.copy()
-    if sites:
-        df_filtered = df_filtered[df_filtered["site"].isin(sites)]
-    if start_date and end_date:
-        df_filtered = df_filtered[
-            (df_filtered["date"] >= start_date) & (df_filtered["date"] <= end_date)
-        ]
-    return sorted(df_filtered["pollutants"].unique())
+        if date_active:
+            start_d = pd.to_datetime(start_date).date()
+            end_d = pd.to_datetime(end_date).date()
 
+            # Sites with no data for (site, pollutant) in selected date range
+            sites_no_data = [
+                s for s in sites
+                if (s, pollutant) not in site_pol_to_dates
+                or site_pol_to_dates[(s, pollutant)][1] < start_d
+                or site_pol_to_dates[(s, pollutant)][0] > end_d
+            ]
 
-@callback(
-    Output("date_range", "min_date_allowed"),
-    Output("date_range", "max_date_allowed"),
-    Input("site_drop", "value"),
-    Input("pol_drop", "value")
-)
-def update_date_picker(sites, pollutant):
-    """Update date picker range."""
-    df_filtered = wales_df_long.copy()
-    if sites:
-        df_filtered = df_filtered[df_filtered["site"].isin(sites)]
-    if pollutant:
-        df_filtered = df_filtered[df_filtered["pollutants"] == pollutant]
-    
-    if df_filtered.empty:
-        return wales_df_long["date"].min().date(), wales_df_long["date"].max().date()
-    
-    return df_filtered["date"].min().date(), df_filtered["date"].max().date()
+            if sites_no_data:
+                return (
+                    f"⚠️ No {pollutant} data in the selected date range for: "
+                    f"{', '.join(sites_no_data)}. Try expanding the date range.",
+                    visible,
+                )
+
+        return "", hidden
+
+     # 8) HOURLY Graph
+
+    @app.callback(
+        Output("time-series-chart", "figure"),
+        Input("site_drop", "value"),
+        Input("pol_drop", "value"),
+        Input("date_range", "start_date"),
+        Input("date_range", "end_date"),
+    )
+    def update_graph(selected_sites, pollutant, start_date, end_date):
+        selected_sites = selected_sites or []
+
+        if not selected_sites or not pollutant or not has_full_date_range(start_date, end_date):
+            fig = px.line(title="Select sites, a pollutant, and a date range")
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                height=400)
+            return fig
+
+        start_dt = pd.to_datetime(start_date)
+        end_dt = pd.to_datetime(end_date) + \
+            pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
+
+        df = wales_df[
+            (wales_df["site"].isin(selected_sites)) &
+            (wales_df["date"] >= start_dt) &
+            (wales_df["date"] <= end_dt)
+        ].copy()
+
+        if df.empty:
+            fig = px.line(title="No data for this selection")
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                height=400)
+            return fig
+
+        df = df.sort_values(["site", "date"])
+
+        fig = px.line(df, x="date", y=pollutant, color="site")
+        fig.update_traces(connectgaps=False)
+
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=400,
+            xaxis_title="Date/Time",
+            yaxis_title=f"{pollutant} (µg/m³)",
+            legend_title="Site",
+            margin=dict(t=60),
+        )
+        return fig
+
 
 @callback(
     Output("meta-stations", "children"),
@@ -407,113 +761,11 @@ def update_date_picker(sites, pollutant):
 def update_topbar(sites, pollutant, start_date, end_date):
     """Update topbar metadata."""
     stations_text = f"{len(sites)}" if sites else "--"
-    pollutant_text = POLLUTANT_DISPLAY_NAMES.get(pollutant, pollutant) if pollutant else "--"
+    pollutant_text = POLLUTANT_DISPLAY_NAMES.get(
+        pollutant, pollutant) if pollutant else "--"
     period_text = format_date_range(start_date, end_date)
-    
+
     return stations_text, pollutant_text, period_text
-
-@callback(
-    Output("time-series-chart", "figure"),
-    Input("site_drop", "value"),
-    Input("pol_drop", "value"),
-    Input("date_range", "start_date"),
-    Input("date_range", "end_date"),
-    Input("threshold-store", "data")
-)
-def update_time_series(sites, pollutant, start_date, end_date, threshold_type):
-    """Update time series chart with dark theme."""
-    if not sites or not pollutant or not start_date or not end_date:
-        # Empty state
-        fig = go.Figure()
-        fig.add_annotation(
-            text="Select stations, pollutant, and date range",
-            xref="paper", yref="paper",
-            x=0.5, y=0.5,
-            showarrow=False,
-            font=dict(size=15, color="rgba(255,255,255,0.4)")
-        )
-        fig.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            height=400,
-            margin=dict(l=60, r=40, t=20, b=60)
-        )
-        return fig
-
-    df_filtered = wales_df[
-        (wales_df["site"].isin(sites)) &
-        (wales_df[pollutant].notna()) &
-        (wales_df["date"] >= start_date) &
-        (wales_df["date"] <= end_date)
-    ]
-
-    if df_filtered.empty:
-        fig = go.Figure()
-        fig.add_annotation(
-            text="No data available",
-            xref="paper", yref="paper",
-            x=0.5, y=0.5,
-            showarrow=False,
-            font=dict(size=15, color="rgba(255,255,255,0.4)")
-        )
-        fig.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            height=400
-        )
-        return fig
-
-    # Create chart
-    fig = px.line(
-        df_filtered,
-        x="date",
-        y=pollutant,
-        color="site",
-        color_discrete_sequence=["#8FB569", "#A855F7", "#F59E0B", "#4ADE80", "#38BDF8"]
-    )
-
-    # Add threshold line
-    threshold_source = LIMITS.get(threshold_type, {}).get(pollutant, {})
-    threshold_val = threshold_source.get('daily') or threshold_source.get('hourly') or threshold_source.get('annual')
-    
-    if threshold_val:
-        fig.add_hline(
-            y=threshold_val,
-            line_dash="dash",
-            line_color="#EF4444",
-            opacity=0.6,
-            annotation_text=f"{threshold_type}: {threshold_val} μg/m³",
-            annotation_position="right",
-            annotation_font_size=11,
-            annotation_font_color="#EF4444"
-        )
-
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font={'color': '#FFFFFF', 'family': 'Inter'},
-        height=400,
-        margin=dict(l=60, r=40, t=20, b=60),
-        xaxis_title="Date",
-        yaxis_title=f"{POLLUTANT_DISPLAY_NAMES.get(pollutant, pollutant)} (μg/m³)",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
-        hovermode='x unified',
-        xaxis=dict(gridcolor="rgba(255,255,255,0.1)", showgrid=True),
-        yaxis=dict(gridcolor="rgba(255,255,255,0.1)", showgrid=True)
-    )
-
-    fig.update_traces(line=dict(width=2.5))
-
-    return fig
 
 
 @callback(
@@ -583,31 +835,34 @@ def update_kpi_tiles(sites, pollutant, start_date, end_date, threshold_type):
             pm25_class = "kpi-tile status-warning"
 
     # Calculate exceedance values
-    exceed_result = calculate_exceedance_rosie(df_filtered, pollutant, threshold_type)
+    exceed_result = calculate_exceedance_rosie(
+        df_filtered, pollutant, threshold_type)
     exceed_val = exceed_result['value']
     exceed_unit = "count" if exceed_result['type'] == 'count' else "μg/m³"
     exceed_subtitle = exceed_result['label']
-    
+
     # Determine status
     if exceed_result['type'] == 'count':
-        exceed_status = get_status_class(exceed_val, exceed_result['limit'], is_exceedance=True)
+        exceed_status = get_status_class(
+            exceed_val, exceed_result['limit'], is_exceedance=True)
     else:
         exceed_status = 'warning'
-    
+
     exceed_class = f"kpi-tile status-{exceed_status}"
 
     # Completeness
     completeness = calculate_completeness(df_filtered, pollutant)
     completeness_val = f"{completeness}%"
-    completeness_status = get_status_class(completeness, 100, is_exceedance=False)
-    
+    completeness_status = get_status_class(
+        completeness, 100, is_exceedance=False)
+
     if completeness >= 85:
         completeness_subtitle = "Excellent data quality"
     elif completeness >= 75:
         completeness_subtitle = "Acceptable quality"
     else:
         completeness_subtitle = "Significant gaps"
-    
+
     completeness_class = f"kpi-tile status-{completeness_status}"
 
     return (
@@ -642,7 +897,7 @@ def update_summary_stats(sites, pollutant, start_date, end_date):
     ]
 
     stats = calculate_summary_stats(df_filtered, pollutant)
-    
+
     return (
         stats['mean'],
         stats['median'],
@@ -651,6 +906,7 @@ def update_summary_stats(sites, pollutant, start_date, end_date):
         stats['max'],
         stats['iqr']
     )
+
 
 @callback(
     Output("completeness-overall", "children"),
@@ -676,8 +932,9 @@ def update_completeness(sites, pollutant, start_date, end_date):
     overall_text = f"{overall}%"
 
     # Per-site
-    site_results = calculate_completeness_by_site(df_filtered, sites, pollutant)
-    
+    site_results = calculate_completeness_by_site(
+        df_filtered, sites, pollutant)
+
     bars = []
     for result in site_results:
         bars.append(
@@ -694,12 +951,14 @@ def update_completeness(sites, pollutant, start_date, end_date):
                             )
                         ]
                     ),
-                    html.Div(f"{result['completeness']}%", className="completeness-percentage")
+                    html.Div(f"{result['completeness']}%",
+                             className="completeness-percentage")
                 ]
             )
         )
 
     return overall_text, bars
+
 
 @callback(
     Output("station-cards-container", "children"),
@@ -714,33 +973,35 @@ def update_station_cards(sites, pollutant, start_date, end_date, threshold_type)
     if not sites or not pollutant or not start_date or not end_date:
         return html.Div(
             "Select stations and pollutant to view details",
-            style={"textAlign": "center", "color": "var(--text-tertiary)", "padding": "40px"}
+            style={"textAlign": "center",
+                   "color": "var(--text-tertiary)", "padding": "40px"}
         )
 
     cards = []
-    
+
     for site in sites:
         site_df = wales_df[
             (wales_df["site"] == site) &
             (wales_df["date"] >= start_date) &
             (wales_df["date"] <= end_date)
         ]
-        
+
         if site_df.empty:
             continue
-        
+
         # Calculate metrics
-        exceed_result = calculate_exceedance_rosie(site_df, pollutant, threshold_type)
+        exceed_result = calculate_exceedance_rosie(
+            site_df, pollutant, threshold_type)
         completeness = calculate_completeness(site_df, pollutant)
-        
+
         # Determine colors
         if exceed_result['type'] == 'count':
             exceed_color = "#EF4444" if exceed_result['value'] > exceed_result['limit'] else "#10B981"
         else:
             exceed_color = "#F59E0B"
-        
+
         comp_color = "#10B981" if completeness >= 85 else "#F59E0B" if completeness >= 75 else "#EF4444"
-        
+
         cards.append(
             html.Div(
                 className="station-card",
@@ -768,10 +1029,12 @@ def update_station_cards(sites, pollutant, start_date, end_date, threshold_type)
                                             60
                                         ),
                                         config={'displayModeBar': False},
-                                        style={"height": "60px", "width": "60px"}
+                                        style={"height": "60px",
+                                               "width": "60px"}
                                     ),
                                     html.Div(
-                                        POLLUTANT_DISPLAY_NAMES.get(pollutant, pollutant),
+                                        POLLUTANT_DISPLAY_NAMES.get(
+                                            pollutant, pollutant),
                                         className="gauge-label"
                                     )
                                 ]
@@ -786,9 +1049,11 @@ def update_station_cards(sites, pollutant, start_date, end_date, threshold_type)
                                             60
                                         ),
                                         config={'displayModeBar': False},
-                                        style={"height": "60px", "width": "60px"}
+                                        style={"height": "60px",
+                                               "width": "60px"}
                                     ),
-                                    html.Div("Complete", className="gauge-label")
+                                    html.Div(
+                                        "Complete", className="gauge-label")
                                 ]
                             )
                         ]
@@ -796,15 +1061,18 @@ def update_station_cards(sites, pollutant, start_date, end_date, threshold_type)
                 ]
             )
         )
-    
+
     if not cards:
         return html.Div(
             "No data available for selected filters",
-            style={"textAlign": "center", "color": "var(--text-tertiary)", "padding": "40px"}
+            style={"textAlign": "center",
+                   "color": "var(--text-tertiary)", "padding": "40px"}
         )
-    
+
     return html.Div(className="station-grid", children=cards)
 
+
+register_callbacks(app, wales_df, wales_df_long)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8052)
